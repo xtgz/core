@@ -1,6 +1,13 @@
-```git clone https://github.com/xtgz/core.git && cd core```
+```
+git clone https://github.com/xtgz/core.git && cd core
+```
+
 ```npm install web3```
 
-```npm init -y ```
+```
+npm init -y 
+```
 
-```node core.js```
+```
+node core.js
+```
