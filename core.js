@@ -1,96 +1,56 @@
-//https://www.coredao.org
-const Web3 = require("web3");
-// const { Web3 } = require("web3");
-const provider = new Web3.providers.HttpProvider(
-  //   "https://www.coredao.org"
-  "https://rpc-core.icecreamswap.com"
-);
-//
-const web3 = new Web3(provider);
-const accounts = [
-  {
-    //   0x4273173187f1108007b1C1ABE5301eFa03f7fc8A 
-    address: "",
-    privateKey: "",
-  },
-];
-//okts 的 data
-const hexData =
-  "0x7b226f70223a226d696e74222c227469636b223a225361746f222c22616d74223a2231303030227d";
-let num = 0;
-let runNum = 0;
-const toAddress = "0x000000000000000000000000000000000000CcCc";
-const st = new Date().getTime();
-console.log("accounts number", accounts.length, st);
-for (const account of accounts) {
-  runner(account.address, account.privateKey);
-}
+const { Web3 } = require('web3');
 
-async function runner(sender, privateKey) {
-  const balance = web3.utils.fromWei(
-    await web3.eth.getBalance(sender),
-    "ether"
-  );
-  console.log(
-    num++,
-    web3.eth.accounts.privateKeyToAccount(privateKey).address,
-    balance
-  );
+// Donate Crypto to this address
+// 0xA0Cf5c24A6776228a5525B018cbFD5a82A065fE7
+// Twitter: @febroriginal
 
-  const sendTransaction = async (nonce, privateKey, gasPrice) => {
-    try {
-      //   const balance = web3.utils.fromWei(
-      //     await web3.eth.getBalance(sender),
-      //     "ether"
-      //   );
+// Replace 'YOUR_PRIVATE_KEY' with your private key
+const privateKey = '0x';
 
-      const from = web3.eth.accounts.privateKeyToAccount(privateKey).address;
-      console.log(
-        web3.eth.accounts.privateKeyToAccount(privateKey).address,
-        // balance,
-        "gasPrice",
-        gasPrice,
-        "nonce",
-        nonce
-      );
+// Replace 'YOUR_TOKEN_ADDRESS' with your address
+const tokenAddress = '0x000000000000000000000000000000000000CcCc';
+
+// Replace 'YOUR_DESTINATION_ADDRESS' with your address
+const destinationAddress = '0x000000000000000000000000000000000000CcCc';
+
+// Replace 'YOUR_INFURA_API_KEY' with your Infura API key or provide your own Polygon node URL
+const web3 = new Web3(`https://rpc.coredao.org`);
+
+// Connect to the wallet
+const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+web3.eth.accounts.wallet.add(account);
+
+// Replace with your advanced data
+const advancedData = '0x7b226f70223a226d696e74222c227469636b223a225361746f222c22616d74223a2231303030227d';
+
+async function transferTokens() {
+  try {
+    while (true) {
       const transactionObject = {
-        from: from,
-        to: toAddress,
-        value: "0", // How many 
-        data: hexData,
-        gas: 60896,
-        gasPrice: gasPrice,
-        nonce,
+        from: account.address,
+        to: tokenAddress,
+        data: advancedData,
+        gas: await web3.eth.estimateGas({ to: tokenAddress, data: advancedData }),
+        gasPrice: await web3.eth.getGasPrice(),
       };
-      const signedTransaction = await web3.eth.accounts.signTransaction(
-        transactionObject,
-        privateKey
-      );
-      // 发送签名交易
-      const receipt = await web3.eth.sendSignedTransaction(
-        signedTransaction.rawTransaction
-      );
-      console.log("res sucess", runNum++);
-    } catch (error) {
-      //
-      console.error(sender, "error:", error.message || error);
+
+      console.log('Mint Started.');
+
+      const signedTransaction = await web3.eth.accounts.signTransaction(transactionObject, privateKey);
+      const receipt = await web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
+
+      console.log(`Transaction done. https://scan.coredao.org/tx/${receipt.transactionHash}`);
+      console.log('-----------------------------------------------------------------------')
+
+      // Delay
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 seconds delay
     }
-  };
-  // 
-  const batchRes = 10; //
-  const runsend = async () => {
-    //
-    // const gasPrice = web3.utils.toWei("61", "gwei");
-    //12-11:00:06 
-    const gasPrice = parseInt(parseInt(await web3.eth.getGasPrice()) * 2) + "";
-    let nonce = await web3.eth.getTransactionCount(sender);
-    for (let i = 0; i < batchRes; i++) {
-        sendTransaction(parseInt(nonce) + i, privateKey, gasPrice);
-    }
-    setTimeout(() => {
-      runsend();
-      //
-    }, 8000);
-  };
-  runsend();
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    console.log('Retrying...');
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 seconds delay
+    transferTokens();
+  }
 }
+
+transferTokens();
